@@ -123,7 +123,7 @@ class HBNBCommand(cmd.Cmd):
             argv (str): The arguments passed to the command
         """
 
-        arguments = split(args)
+        arguments = args.split(" ")
         class_name = ""
         params = []
 
@@ -143,7 +143,10 @@ class HBNBCommand(cmd.Cmd):
             param = param.split("=")
             if len(param) == 2:
                 param_type = type(new_instance.__class__.__dict__[param[0]])
-                param[1] = param[1].replace("_", " ")
+                if param_type is str:
+                    if param[1][0] != '"' or param[1][-1] != '"':
+                        continue
+                param[1] = param[1].replace("_", " ").strip('"')
                 new_dict[param[0]] = param_type(param[1])
         
         new_instance.__dict__.update(new_dict)
