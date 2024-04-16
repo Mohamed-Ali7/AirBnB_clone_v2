@@ -144,7 +144,7 @@ class HBNBCommand(cmd.Cmd):
             attribute_value = param[1].strip('"')
 
             if param[1].startswith('"')\
-                    and attribute_value.endswith('"'):
+                    and param[1].endswith('"'):
                 attribute_value = attribute_value.replace("_", " ")
             elif "." in attribute_value:
                 try:
@@ -159,8 +159,8 @@ class HBNBCommand(cmd.Cmd):
 
             new_dict[attribute_name] = attribute_value
 
-        new_instance = HBNBCommand.classes[class_name](**new_dict)
-
+        new_instance = HBNBCommand.classes[class_name]()
+        new_instance.__dict__.update()
         storage.save()
         print(new_instance.id)
 
