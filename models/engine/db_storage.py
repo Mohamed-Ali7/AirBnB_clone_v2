@@ -52,7 +52,7 @@ class DBStorage:
             for class_name in [City, State, User]:
                 query = self.__session.query(class_name).all()
                 for obj in query:
-                    obj_key = f"{obj.__class__.name}.{obj.id}"
+                    obj_key = f"{obj.__class__.__name__}.{obj.id}"
                     objects[obj_key] = obj
 
         return objects
