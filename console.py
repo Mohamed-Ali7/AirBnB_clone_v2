@@ -141,12 +141,12 @@ class HBNBCommand(cmd.Cmd):
 
         for param in params:
             param = param.split("=")
-            if param[0] and param[1]:
+            if len(param) == 2:
                 param_type = type(new_instance.__class__.__dict__[param[0]])
                 param[1] = param[1].replace("_", " ")
                 new_dict[param[0]] = param_type(param[1])
-                new_instance.__dict__.update(new_dict)
-
+        
+        new_instance.__dict__.update(new_dict)
         storage.save()
         print(new_instance.id)
 
