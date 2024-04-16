@@ -141,14 +141,25 @@ class HBNBCommand(cmd.Cmd):
 
         for param in params:
             param = param.split("=")
-            if len(param) == 2:
-                param_type = type(new_instance.__class__.__dict__[param[0]])
-                if param_type is str:
-                    if param[1][0] != '"' or param[1][-1] != '"':
-                        continue
-                param[1] = param[1].replace("_", " ").strip('"')
-                new_dict[param[0]] = param_type(param[1])
-        
+            attribute_name = param[0]
+            attribute_value = param[1]
+
+            if attribute_value.startswith('"')\
+                    and attribute_value.endswith('"'):
+                attribute_value = attribute_value.replace("_", " ").strip('"')
+            elif "." in attribute_value:
+                try:
+                    attribute_value = float(attribute_value.strip('"'))
+                except ValueError:
+                    continue
+            else:
+                try:
+                    attribute_value = int(attribute_value.strip('"'))
+                except ValueError:
+                    continue
+
+            new_dict[attribute_name] = attribute_value
+
         new_instance.__dict__.update(new_dict)
         storage.save()
         print(new_instance.id)
