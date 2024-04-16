@@ -10,6 +10,7 @@ from models.state import State
 from models.city import City
 from models.amenity import Amenity
 from models.review import Review
+from shlex import split
 
 
 class HBNBCommand(cmd.Cmd):
@@ -114,17 +115,40 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class"""
+        """
+        Creates a new instance of a class
+        saves it (to the JSON file) and prints the id. Ex: ($ create BaseModel)
+
+        Args:
+            argv (str): The arguments passed to the command
+        """
+
+        arguments = split(args)
+        class_name = ""
+        params = []
+
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+        elif arguments[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
+
+        class_name = arguments[0]
+        params = arguments[1:]
+        new_instance = HBNBCommand.classes[class_name]()
+        new_dict = {}
+
+        for param in params:
+            param = param.split("=")
+            if param[0] and param[1]:
+                param_type = type(new_instance.__class__.__dict__[param[0]])
+                param[1] = param[1].replace("_", " ")
+                new_dict[param[0]] = param_type(param[1])
+                new_instance.__dict__.update(new_dict)
+
         storage.save()
         print(new_instance.id)
-        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
@@ -319,6 +343,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
