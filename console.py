@@ -160,7 +160,7 @@ class HBNBCommand(cmd.Cmd):
             new_dict[attribute_name] = attribute_value
 
         new_instance = HBNBCommand.classes[class_name]()
-        new_instance.__dict__.update()
+        new_instance.__dict__.update(new_dict)
         storage.save()
         print(new_instance.id)
 
