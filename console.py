@@ -123,7 +123,7 @@ class HBNBCommand(cmd.Cmd):
             argv (str): The arguments passed to the command
         """
 
-        arguments = split(args)
+        arguments = args.split(" ")
         class_name = ""
         params = []
 
@@ -136,21 +136,31 @@ class HBNBCommand(cmd.Cmd):
 
         class_name = arguments[0]
         params = arguments[1:]
-        new_instance = HBNBCommand.classes[class_name]()
         new_dict = {}
 
         for param in params:
             param = param.split("=")
-            if len(param) == 2:
-                param_type = type(new_instance.__class__.__dict__[param[0]])
-                param[1] = param[1].replace("_", " ")
+            attribute_name = param[0]
+            attribute_value = param[1].strip('"')
+
+            if param[1].startswith('"')\
+                    and attribute_value.endswith('"'):
+                attribute_value = attribute_value.replace("_", " ")
+            elif "." in attribute_value:
                 try:
-                    value = param_type(param[1])
+                    attribute_value = float(attribute_value)
                 except ValueError:
                     continue
-                new_dict[param[0]] = value
+            else:
+                try:
+                    attribute_value = int(attribute_value)
+                except ValueError:
+                    continue
 
-        new_instance.__dict__.update(new_dict)
+            new_dict[attribute_name] = attribute_value
+
+        new_instance = HBNBCommand.classes[class_name](**new_dict)
+
         storage.save()
         print(new_instance.id)
 
