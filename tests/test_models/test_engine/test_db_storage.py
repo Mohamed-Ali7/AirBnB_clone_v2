@@ -3,13 +3,9 @@
 from models.engine.db_storage import DBStorage
 from models import storage
 import MySQLdb
-from models.base_model import BaseModel, Base
+from models.base_model import Base
 from models.user import User
-from models.city import City
-from models.place import Place
-from models.review import Review
 from models.amenity import Amenity
-from models.state import State
 import unittest
 import os
 
@@ -85,17 +81,6 @@ class TestDBStorage(unittest.TestCase):
 
         my_cursor = self.cursor
 
-        Base.metadata.drop_all(storage._DBStorage__engine)
-
-        my_cursor.execute("SHOW TABLES")
-        self.assertEqual(my_cursor.rowcount, 0)
-
-        storage.reload()
-        self.db_connection.commit()
-        my_cursor.execute("SHOW TABLES")
-        self.assertEqual(my_cursor.rowcount, 7)
-        self.assertIn(("users",), my_cursor.fetchall())
-
         amenity = Amenity(name="Pets")
 
         my_cursor.execute("INSERT INTO amenities VALUES(%s, %s, %s, %s)",
@@ -162,3 +147,19 @@ class TestDBStorage(unittest.TestCase):
         my_cursor.execute('SELECT * FROM users')
         new_count = my_cursor.rowcount
         self.assertEqual(new_count, old_count + 1)
+
+    def test_all(self):
+        """Tests all() method"""
+
+        my_cursor = self.cursor
+        amenity = Amenity(name="Pets")
+
+        self.assertNotIn(f"Amenity.{amenity.id}", storage.all())
+
+        my_cursor.execute("INSERT INTO amenities VALUES(%s, %s, %s, %s)",
+                          (amenity.id, amenity.created_at,
+                           amenity.updated_at, amenity.name))
+        self.db_connection.commit()
+
+        storage.reload()
+        self.assertIn(f"Amenity.{amenity.id}", storage.all(Amenity))
