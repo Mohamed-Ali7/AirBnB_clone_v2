@@ -95,6 +95,40 @@ class TestDBStorage(unittest.TestCase):
         storage.reload()
         self.assertIn(f"Amenity.{amenity.id}", storage.all())
 
+    def test_save(self):
+        """ Tests save method """
+
+        my_cursor = self.cursor
+
+        user = User(
+            email='user@gmail.com',
+            password='password',
+            first_name='user',
+            last_name='user'
+        )
+
+        my_cursor.execute('SELECT * FROM users WHERE id=%s', (user.id,))
+        result = my_cursor.fetchone()
+        old_count = my_cursor.rowcount
+        self.assertTrue(result is None)
+        self.assertFalse(user in storage.all().values())
+        user.save()
+
+        self.db_connection.commit()
+
+        my_cursor.execute('SELECT * FROM users WHERE id=%s', (user.id,))
+        result = my_cursor.fetchone()
+
+        new_count = my_cursor.rowcount
+        self.assertFalse(result is None)
+        self.assertEqual(old_count + 1, new_count)
+        self.assertIn(f"User.{user.id}", storage.all())
+
+    def test_storage_var_created(self):
+        """ DBStorage object storage created """
+        from models.engine.db_storage import DBStorage
+        self.assertEqual(type(storage), DBStorage)
+
     def test_new_and_save(self):
         '''testing  the new and save methods'''
         db = MySQLdb.connect(user=os.getenv('HBNB_MYSQL_USER'),
