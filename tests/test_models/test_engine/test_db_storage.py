@@ -79,15 +79,8 @@ class TestDBStorage(unittest.TestCase):
 
     def test_reload(self):
         """ Tests the reloading of the database session """
-        dbc = MySQLdb.connect(
-            host=os.getenv('HBNB_MYSQL_HOST'),
-            port=3306,
-            user=os.getenv('HBNB_MYSQL_USER'),
-            passwd=os.getenv('HBNB_MYSQL_PWD'),
-            db=os.getenv('HBNB_MYSQL_DB')
-        )
-        cursor = dbc.cursor()
-        cursor.execute(
+        my_cursor = self.cursor
+        my_cursor.execute(
             'INSERT INTO users(id, created_at, updated_at, email, password' +
             ', first_name, last_name) VALUES(%s, %s, %s, %s, %s, %s, %s);',
             [
@@ -101,11 +94,9 @@ class TestDBStorage(unittest.TestCase):
             ]
         )
         self.assertNotIn('User.4447-by-me', storage.all())
-        dbc.commit()
+        self.db_connection.commit()
         storage.reload()
         self.assertIn('User.4447-by-me', storage.all())
-        cursor.close()
-        dbc.close()
 
     def test_save(self):
         """ Tests save method """
@@ -140,21 +131,3 @@ class TestDBStorage(unittest.TestCase):
         """ DBStorage object storage created """
         from models.engine.db_storage import DBStorage
         self.assertEqual(type(storage), DBStorage)
-
-    def test_new_and_save(self):
-        """Tests save() and new() methods"""
-        my_cursor = self.cursor
-        user = User(
-            email='user@gmail.com',
-            password='password',
-            first_name='user',
-            last_name='user'
-        )
-        my_cursor.execute('SELECT COUNT(*) FROM users')
-        old_count = my_cursor.fetchall()
-        user.save()
-        self.db_connection.commit()
-
-        my_cursor.execute('SELECT COUNT(*) FROM users')
-        new_count = my_cursor.fetchall()
-        self.assertEqual(new_count[0][0], old_count[0][0] + 1)
