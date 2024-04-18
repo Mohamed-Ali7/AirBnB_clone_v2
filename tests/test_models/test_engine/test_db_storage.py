@@ -1,9 +1,7 @@
 #!/usr/bin/python3
 """This module contains TestDBStorage class"""
-from models.engine.db_storage import DBStorage
 from models import storage
 import MySQLdb
-from models.base_model import Base
 from models.user import User
 from models.amenity import Amenity
 import unittest
