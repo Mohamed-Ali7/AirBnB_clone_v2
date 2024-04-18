@@ -121,7 +121,7 @@ class TestDBStorage(unittest.TestCase):
         self.assertEqual(old_count + 1, new_count)
         self.assertIn(f"User.{user.id}", storage.all())
 
-    def test_storage_var_created(spyelf):
+    def test_storage_var_created(self):
         """ DBStorage object storage created """
         from models.engine.db_storage import DBStorage
         self.assertEqual(type(storage), DBStorage)
