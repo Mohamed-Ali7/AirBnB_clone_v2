@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """This module contains TestDBStorage class"""
+from datetime import datetime
 from models import storage
 import MySQLdb
 from models.user import User
