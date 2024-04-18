@@ -13,6 +13,13 @@ from models import storage
 class TestHBNBCommand(unittest.TestCase):
     """Represents the test class for the HBNBCommand class.
     """
+
+    def tearDown(self):
+        """Excutes data after each test method"""
+
+        if os.path.exists("file.json"):
+            os.remove("file.json")
+
     @unittest.skipIf(
         os.getenv('HBNB_TYPE_STORAGE') == 'db', 'FileStorage test')
     def test_create_with_file(self):
@@ -76,8 +83,8 @@ class TestHBNBCommand(unittest.TestCase):
         self.assertEqual(storage.all(), {})
 
         with patch('sys.stdout', new=StringIO()) as f:
-            HBNBCommand().onecmd('create User email="user@email.com"\
-                                 password="123"')
+            HBNBCommand().onecmd(
+                'create User email="user@email.com" password="123"')
 
         key = f"User.{f.getvalue().strip()}"
         print(key)
