@@ -79,24 +79,25 @@ class TestDBStorage(unittest.TestCase):
 
     def test_reload(self):
         """ Tests the reloading of the database session """
+
         my_cursor = self.cursor
+        user = User(
+            email="user@gmail.com",
+            password="123456",
+            first_name="user",
+            last_name="user"
+        )
         my_cursor.execute(
             'INSERT INTO users(id, created_at, updated_at, email, password' +
-            ', first_name, last_name) VALUES(%s, %s, %s, %s, %s, %s, %s);',
-            [
-                '4447-by-me',
-                str(datetime.now()),
-                str(datetime.now()),
-                'ben_pike@yahoo.com',
-                'pass',
-                'Benjamin',
-                'Pike',
-            ]
+            ', first_name, last_name) VALUES(%s, %s, %s, %s, %s, %s, %s)',
+            (user.id, user.created_at, user.updated_at, user.email,
+             user.password, user.first_name, user.last_name,
+            )
         )
-        self.assertNotIn('User.4447-by-me', storage.all())
+        self.assertNotIn(f'User.{user.id}', storage.all())
         self.db_connection.commit()
         storage.reload()
-        self.assertIn('User.4447-by-me', storage.all())
+        self.assertIn(f'User.{user.id}', storage.all())
 
     def test_save(self):
         """ Tests save method """
