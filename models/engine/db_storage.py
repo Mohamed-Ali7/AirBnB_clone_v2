@@ -30,9 +30,7 @@ class DBStorage:
                                       pool_pre_ping=True)
 
         if os.getenv("HBNB_ENV") == "test":
-            meta = MetaData(self.__engine)
-            meta.reflect()
-            meta.drop_all()
+            Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
         """
