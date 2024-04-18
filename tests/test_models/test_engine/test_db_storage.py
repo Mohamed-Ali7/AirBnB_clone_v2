@@ -64,17 +64,36 @@ class TestDBStorage(unittest.TestCase):
         self.assertIn(user.password, result)
 
     def test_delete(self):
-        """Tests delete method"""
-
-        amenity = Amenity(name="Wifi")
-
-        amenity.save()
-
-        self.assertIn(amenity, storage.all().values())
-
-        amenity.delete()
-
-        self.assertNotIn(amenity, storage.all().values())
+        """ Object is correctly deleted from database """
+        new = User(
+            email='john2020@gmail.com',
+            password='password',
+            first_name='John',
+            last_name='Zoldyck'
+        )
+        obj_key = 'User.{}'.format(new.id)
+        dbc = MySQLdb.connect(
+            host=os.getenv('HBNB_MYSQL_HOST'),
+            port=3306,
+            user=os.getenv('HBNB_MYSQL_USER'),
+            passwd=os.getenv('HBNB_MYSQL_PWD'),
+            db=os.getenv('HBNB_MYSQL_DB')
+        )
+        new.save()
+        self.assertTrue(new in storage.all().values())
+        cursor = dbc.cursor()
+        cursor.execute('SELECT * FROM users WHERE id="{}"'.format(new.id))
+        result = cursor.fetchone()
+        self.assertTrue(result is not None)
+        self.assertIn('john2020@gmail.com', result)
+        self.assertIn('password', result)
+        self.assertIn('John', result)
+        self.assertIn('Zoldyck', result)
+        self.assertIn(obj_key, storage.all(User).keys())
+        new.delete()
+        self.assertNotIn(obj_key, storage.all(User).keys())
+        cursor.close()
+        dbc.close()
 
     def test_reload(self):
         """Tests reload method"""
