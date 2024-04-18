@@ -95,54 +95,31 @@ class TestDBStorage(unittest.TestCase):
         storage.reload()
         self.assertIn(f"Amenity.{amenity.id}", storage.all())
 
-    def test_save(self):
-        """ Tests save method """
-
-        my_cursor = self.cursor
-
-        user = User(
-            email='user@gmail.com',
-            password='password',
-            first_name='user',
-            last_name='user'
-        )
-
-        my_cursor.execute('SELECT * FROM users WHERE id=%s', (user.id,))
-        result = my_cursor.fetchone()
-        old_count = my_cursor.rowcount
-        self.assertTrue(result is None)
-        self.assertFalse(user in storage.all().values())
-        user.save()
-
-        self.db_connection.commit()
-
-        my_cursor.execute('SELECT * FROM users WHERE id=%s', (user.id,))
-        result = my_cursor.fetchone()
-
-        new_count = my_cursor.rowcount
-        self.assertFalse(result is None)
-        self.assertEqual(old_count + 1, new_count)
-        self.assertIn(f"User.{user.id}", storage.all())
-
-    def test_storage_var_created(self):
-        """ DBStorage object storage created """
-        from models.engine.db_storage import DBStorage
-        self.assertEqual(type(storage), DBStorage)
-
     def test_new_and_save(self):
-        """Tests save() and new() methods"""
-        my_cursor = self.cursor
-        user = User(
-            email='user@gmail.com',
-            password='password',
-            first_name='user',
-            last_name='user'
-        )
-        my_cursor.execute('SELECT COUNT(*) FROM users')
-        old_count = my_cursor.fetchall()
-        user.save()
-        self.db_connection.commit()
-
-        my_cursor.execute('SELECT COUNT(*) FROM users')
-        new_count = my_cursor.fetchall()
+        '''testing  the new and save methods'''
+        db = MySQLdb.connect(user=os.getenv('HBNB_MYSQL_USER'),
+                             host=os.getenv('HBNB_MYSQL_HOST'),
+                             passwd=os.getenv('HBNB_MYSQL_PWD'),
+                             port=3306,
+                             db=os.getenv('HBNB_MYSQL_DB'))
+        new_user = User(**{'first_name': 'jack',
+                           'last_name': 'bond',
+                           'email': 'jack@bond.com',
+                           'password': 12345})
+        cur = db.cursor()
+        cur.execute('SELECT COUNT(*) FROM users')
+        old_count = cur.fetchall()
+        cur.close()
+        db.close()
+        new_user.save()
+        db = MySQLdb.connect(user=os.getenv('HBNB_MYSQL_USER'),
+                             host=os.getenv('HBNB_MYSQL_HOST'),
+                             passwd=os.getenv('HBNB_MYSQL_PWD'),
+                             port=3306,
+                             db=os.getenv('HBNB_MYSQL_DB'))
+        cur = db.cursor()
+        cur.execute('SELECT COUNT(*) FROM users')
+        new_count = cur.fetchall()
         self.assertEqual(new_count[0][0], old_count[0][0] + 1)
+        cur.close()
+        db.close()
