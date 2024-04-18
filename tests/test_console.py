@@ -80,7 +80,8 @@ class TestHBNBCommand(unittest.TestCase):
         self.assertEqual(storage.all(), {})
 
         with patch('sys.stdout', new=StringIO()) as f:
-            HBNBCommand().onecmd('create User email="user@email.com" password="123"')
+            HBNBCommand().onecmd('create User email="user@email.com"\
+                                 password="123"')
 
         key = f"User.{f.getvalue().strip()}"
         print(key)
@@ -95,12 +96,11 @@ class TestHBNBCommand(unittest.TestCase):
                 db=os.getenv('HBNB_MYSQL_DB')
             )
         cursor = db.cursor()
-        cursor.execute('SELECT * FROM users WHERE id=%s', (f.getvalue().strip(),))
+        cursor.execute('SELECT * FROM users WHERE id=%s',
+                       (f.getvalue().strip(),))
         result = cursor.fetchone()
         self.assertTrue(result is not None)
         self.assertIn('user@email.com', result)
         self.assertIn('123', result)
         cursor.close()
         db.close()
-
-    
