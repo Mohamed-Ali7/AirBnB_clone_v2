@@ -128,3 +128,21 @@ class TestDBStorage(unittest.TestCase):
         """ DBStorage object storage created """
         from models.engine.db_storage import DBStorage
         self.assertEqual(type(storage), DBStorage)
+
+    def test_new_and_save(self):
+        """Tests save() and new() methods"""
+        my_cursor = self.cursor
+        user = User(
+            email='user@gmail.com',
+            password='password',
+            first_name='user',
+            last_name='user'
+        )
+        my_cursor.execute('SELECT COUNT(*) FROM users')
+        old_count = my_cursor.fetchall()
+        user.save()
+        self.db_connection.commit()
+
+        my_cursor.execute('SELECT COUNT(*) FROM users')
+        new_count = my_cursor.fetchall()
+        self.assertEqual(new_count[0][0], old_count[0][0] + 1)
