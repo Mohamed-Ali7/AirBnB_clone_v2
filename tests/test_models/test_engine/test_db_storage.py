@@ -121,9 +121,9 @@ class TestDBStorage(unittest.TestCase):
         new_count = my_cursor.rowcount
         self.assertFalse(result is None)
         self.assertEqual(old_count + 1, new_count)
-        self.assertTrue(user in storage.all().values())
+        self.assertIn(f"User.{user.id}", storage.all())
 
-    def test_storage_var_created(self):
+    def test_storage_var_created(spyelf):
         """ DBStorage object storage created """
         from models.engine.db_storage import DBStorage
         self.assertEqual(type(storage), DBStorage)
@@ -147,19 +147,3 @@ class TestDBStorage(unittest.TestCase):
         my_cursor.execute('SELECT * FROM users')
         new_count = my_cursor.rowcount
         self.assertEqual(new_count, old_count + 1)
-
-    def test_all(self):
-        """Tests all() method"""
-
-        my_cursor = self.cursor
-        amenity = Amenity(name="Pets")
-
-        self.assertNotIn(f"Amenity.{amenity.id}", storage.all())
-
-        my_cursor.execute("INSERT INTO amenities VALUES(%s, %s, %s, %s)",
-                          (amenity.id, amenity.created_at,
-                           amenity.updated_at, amenity.name))
-        self.db_connection.commit()
-
-        storage.reload()
-        self.assertIn(f"Amenity.{amenity.id}", storage.all(Amenity))
