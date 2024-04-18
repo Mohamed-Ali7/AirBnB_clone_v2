@@ -12,6 +12,8 @@ import unittest
 import os
 
 
+@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db',
+                 'Only run this test when the storage is a file')
 class TestFileStorage(unittest.TestCase):
     """This class is for testing FileStorage class attributes and functions"""
 
