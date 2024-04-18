@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 """This module contains TestDBStorage class"""
-from datetime import datetime
 from models import storage
 import MySQLdb
 from models.user import User
@@ -69,8 +68,7 @@ class TestDBStorage(unittest.TestCase):
 
         amenity = Amenity(name="Wifi")
 
-        storage.new(amenity)
-        storage.save()
+        amenity.save()
 
         self.assertIn(amenity, storage.all().values())
 
@@ -79,77 +77,51 @@ class TestDBStorage(unittest.TestCase):
         self.assertNotIn(amenity, storage.all().values())
 
     def test_reload(self):
-        """ Tests the reloading of the database session """
-        dbc = MySQLdb.connect(
-            host=os.getenv('HBNB_MYSQL_HOST'),
-            port=3306,
-            user=os.getenv('HBNB_MYSQL_USER'),
-            passwd=os.getenv('HBNB_MYSQL_PWD'),
-            db=os.getenv('HBNB_MYSQL_DB')
-        )
-        cursor = dbc.cursor()
-        cursor.execute(
-            'INSERT INTO users(id, created_at, updated_at, email, password' +
-            ', first_name, last_name) VALUES(%s, %s, %s, %s, %s, %s, %s);',
-            [
-                '4447-by-me',
-                str(datetime.now()),
-                str(datetime.now()),
-                'ben_pike@yahoo.com',
-                'pass',
-                'Benjamin',
-                'Pike',
-            ]
-        )
-        self.assertNotIn('User.4447-by-me', storage.all())
-        dbc.commit()
+        """Tests reload method"""
+
+        my_cursor = self.cursor
+
+        amenity = Amenity(name="Pets")
+
+        my_cursor.execute("INSERT INTO amenities VALUES(%s, %s, %s, %s)",
+                          (amenity.id, amenity.created_at,
+                           amenity.updated_at, amenity.name))
+
+        self.assertNotIn(f"Amenity.{amenity.id}", storage.all())
+
+        self.db_connection.commit()
+
         storage.reload()
-        self.assertIn('User.4447-by-me', storage.all())
-        cursor.close()
-        dbc.close()
+        self.assertIn(f"Amenity.{amenity.id}", storage.all())
 
     def test_save(self):
-        """ object is successfully saved to database """
-        new = User(
-            email='john2020@gmail.com',
+        """ Tests save method """
+
+        my_cursor = self.cursor
+
+        user = User(
+            email='user@gmail.com',
             password='password',
-            first_name='John',
-            last_name='Zoldyck'
+            first_name='user',
+            last_name='user'
         )
-        dbc = MySQLdb.connect(
-            host=os.getenv('HBNB_MYSQL_HOST'),
-            port=3306,
-            user=os.getenv('HBNB_MYSQL_USER'),
-            passwd=os.getenv('HBNB_MYSQL_PWD'),
-            db=os.getenv('HBNB_MYSQL_DB')
-        )
-        cursor = dbc.cursor()
-        cursor.execute('SELECT * FROM users WHERE id="{}"'.format(new.id))
-        result = cursor.fetchone()
-        cursor.execute('SELECT COUNT(*) FROM users;')
-        old_cnt = cursor.fetchone()[0]
+
+        my_cursor.execute('SELECT * FROM users WHERE id=%s', (user.id,))
+        result = my_cursor.fetchone()
+        old_count = my_cursor.rowcount
         self.assertTrue(result is None)
-        self.assertFalse(new in storage.all().values())
-        new.save()
-        dbc1 = MySQLdb.connect(
-            host=os.getenv('HBNB_MYSQL_HOST'),
-            port=3306,
-            user=os.getenv('HBNB_MYSQL_USER'),
-            passwd=os.getenv('HBNB_MYSQL_PWD'),
-            db=os.getenv('HBNB_MYSQL_DB')
-        )
-        cursor1 = dbc1.cursor()
-        cursor1.execute('SELECT * FROM users WHERE id="{}"'.format(new.id))
-        result = cursor1.fetchone()
-        cursor1.execute('SELECT COUNT(*) FROM users;')
-        new_cnt = cursor1.fetchone()[0]
+        self.assertFalse(user in storage.all().values())
+        user.save()
+
+        self.db_connection.commit()
+
+        my_cursor.execute('SELECT * FROM users WHERE id=%s', (user.id,))
+        result = my_cursor.fetchone()
+
+        new_count = my_cursor.rowcount
         self.assertFalse(result is None)
-        self.assertEqual(old_cnt + 1, new_cnt)
-        self.assertTrue(new in storage.all().values())
-        cursor1.close()
-        dbc1.close()
-        cursor.close()
-        dbc.close()
+        self.assertEqual(old_count + 1, new_count)
+        self.assertIn(f"User.{user.id}", storage.all())
 
     def test_storage_var_created(self):
         """ DBStorage object storage created """
