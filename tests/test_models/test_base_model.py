@@ -7,8 +7,6 @@ import os
 from models import storage
 
 
-@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db',
-                 'Only run this test when the storage is a file')
 class TestBaseModel(unittest.TestCase):
     """This class is for testing BaseModel class attributes and functions"""
 
