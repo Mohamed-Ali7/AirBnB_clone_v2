@@ -14,8 +14,7 @@ import unittest
 import os
 
 
-@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db'
-                 or not storage._DBStorage__engine.table_names(),
+@unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db',
                  'Only run this test when the storage is a database')
 class TestDBStorage(unittest.TestCase):
     """This class is for testing DBStorage class attributes and functions"""
@@ -109,3 +108,57 @@ class TestDBStorage(unittest.TestCase):
 
         storage.reload()
         self.assertIn(f"Amenity.{amenity.id}", storage.all())
+
+    def test_save(self):
+        """ Tests save method """
+
+        my_cursor = self.cursor
+
+        user = User(
+            email='user@gmail.com',
+            password='password',
+            first_name='user',
+            last_name='user'
+        )
+
+        my_cursor.execute('SELECT * FROM users WHERE id=%s', (user.id,))
+        result = my_cursor.fetchone()
+        old_count = my_cursor.rowcount
+        self.assertTrue(result is None)
+        self.assertFalse(user in storage.all().values())
+        user.save()
+
+        self.db_connection.commit()
+
+        my_cursor.execute('SELECT * FROM users WHERE id=%s', (user.id,))
+        result = my_cursor.fetchone()
+
+        new_count = my_cursor.rowcount
+        self.assertFalse(result is None)
+        self.assertEqual(old_count + 1, new_count)
+        self.assertTrue(user in storage.all().values())
+
+    def test_storage_var_created(self):
+        """ DBStorage object storage created """
+        from models.engine.db_storage import DBStorage
+        self.assertEqual(type(storage), DBStorage)
+
+    def test_new(self):
+        """Tests new() method"""
+        my_cursor = self.cursor
+
+        user = User(
+            email='user@gmail.com',
+            password='password',
+            first_name='user',
+            last_name='user'
+        )
+        my_cursor.execute('SELECT * FROM users')
+        print(my_cursor.fetchone())
+        old_count = my_cursor.rowcount
+        user.save()
+        self.db_connection.commit()
+
+        my_cursor.execute('SELECT * FROM users')
+        new_count = my_cursor.rowcount
+        self.assertEqual(new_count, old_count + 1)
