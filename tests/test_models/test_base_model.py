@@ -2,7 +2,7 @@
 """This module contains TestBaseModel class to test BaseModel class"""
 import unittest
 from sqlalchemy import Column
-from models.base_model import BaseModel
+from models.base_model import BaseModel, Base
 from datetime import datetime
 import os
 from models import storage
@@ -19,6 +19,7 @@ class TestBaseModel(unittest.TestCase):
         b1_dict = b1.to_dict()
 
         self.assertEqual(len(b1.id), 36)
+        self.assertNotIsInstance(b1, Base.__class__)
 
         # Checking attributes types
         self.assertEqual(type(b1.id), str)
