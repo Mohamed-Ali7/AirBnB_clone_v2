@@ -41,6 +41,8 @@ class BaseModel():
                 elif key == "created_at" or key == "updated_at":
                     setattr(self, key, datetime.fromisoformat(value))
                 else:
+                    if key not in self.__class__.__dict__:
+                        raise KeyError
                     setattr(self, key, value)
         else:
             self.id = str(uuid.uuid4())
@@ -65,15 +67,16 @@ class BaseModel():
 
     def to_dict(self):
         """Convert instance into dict format"""
-        res = {}
-        for key, value in self.__dict__.items():
-            if key != '_sa_instance_state':
-                if isinstance(value, datetime):
-                    res[key] = value.isoformat()
-                else:
-                    res[key] = value
-        res['__class__'] = self.__class__.__name__
-        return res
+
+        dictionary = self.__dict__.copy()
+        dictionary["__class__"] = self.__class__.__name__
+        dictionary['created_at'] = self.created_at.isoformat()
+        dictionary['updated_at'] = self.updated_at.isoformat()
+
+        if "_sa_instance_state" in dictionary:
+            del dictionary["_sa_instance_state"]
+
+        return dictionary
 
     def delete(self):
         """Deletes the current instance from the storage"""
