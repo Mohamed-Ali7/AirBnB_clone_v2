@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """This module contains TestBaseModel class to test BaseModel class"""
 import unittest
+from sqlalchemy import Column
 from models.base_model import BaseModel
 from datetime import datetime
 import os
@@ -23,6 +24,9 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(type(b1.id), str)
         self.assertEqual(type(b1.created_at), datetime)
         self.assertEqual(type(b1.updated_at), datetime)
+        self.assertEqual(type(BaseModel.id), Column)
+        self.assertEqual(type(BaseModel.created_at), Column)
+        self.assertEqual(type(BaseModel.updated_at), Column)
         self.assertEqual(type(b1_dict["created_at"]), str)
         self.assertEqual(type(b1_dict["updated_at"]), str)
 
