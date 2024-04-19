@@ -23,10 +23,8 @@ class TestBaseModel(unittest.TestCase):
 
     def tearDown(self):
         """Executes after each test method"""
-        try:
+        if os.path.exists("file.json"):
             os.remove('file.json')
-        except:
-            pass
 
     def test_default(self):
         """Tests normal initialization"""
@@ -159,5 +157,3 @@ class TestBaseModel(unittest.TestCase):
         model.save()
         model.delete()
         self.assertNotIn(f"BaseModel.{model_id}", storage.all())
-        if os.path.exists("file.json"):
-            os.remove("file.json")
