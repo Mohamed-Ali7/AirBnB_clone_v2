@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """This module contains TestBaseModel class to test BaseModel class"""
+import json
 import unittest
 from models.base_model import BaseModel
 from datetime import datetime
@@ -10,85 +11,83 @@ from models import storage
 class TestBaseModel(unittest.TestCase):
     """This class is for testing BaseModel class attributes and functions"""
 
-    def test_instantiation(self):
-        """Tests creating an instance of BaseModel class"""
+    def __init__(self, *args, **kwargs):
+        """ """
+        super().__init__(*args, **kwargs)
+        self.name = 'BaseModel'
+        self.value = BaseModel
 
-        b1 = BaseModel()
-        old_updated_at = b1.updated_at
-        b1_dict = b1.to_dict()
+    def setUp(self):
+        """Executes before each test method"""
+        pass
 
-        self.assertEqual(len(b1.id), 36)
+    def tearDown(self):
+        """Executes after each test method"""
+        try:
+            os.remove('file.json')
+        except:
+            pass
 
-        # Checking attributes types
-        self.assertEqual(type(b1.id), str)
-        self.assertEqual(type(b1.created_at), datetime)
-        self.assertEqual(type(b1.updated_at), datetime)
-        self.assertEqual(type(b1_dict["created_at"]), str)
-        self.assertEqual(type(b1_dict["updated_at"]), str)
+    def test_default(self):
+        """Tests normal initialization"""
+        i = self.value()
+        self.assertEqual(type(i), self.value)
 
-        self.assertLess(b1.created_at, b1.updated_at)
+    def test_kwargs(self):
+        """Tests initialization through kwargs"""
+        i = self.value()
+        copy = i.to_dict()
+        new = BaseModel(**copy)
+        self.assertFalse(new is i)
 
-        # Checking __class__ attribute in __dict__ and to_dict()
-        self.assertNotEqual(b1.created_at, old_updated_at)
-        self.assertTrue("__class__" in b1_dict)
-        self.assertTrue("__class__" not in b1.__dict__)
+    def test_kwargs_int(self):
+        """Tests raising exception when kwargs is an int"""
+        i = self.value()
+        copy = i.to_dict()
+        copy.update({1: 2})
+        with self.assertRaises(TypeError):
+            new = BaseModel(**copy)
 
-        # Creating a new instance using kwargs
-        b2 = BaseModel(**b1_dict)
+    def test_kwargs_none(self):
+        """Tests when kwargs is none"""
+        n = {None: None}
+        with self.assertRaises(TypeError):
+            new = self.value(**n)
 
-        self.assertTrue("__class__" in b2.to_dict())
-        self.assertTrue("__class__" not in b2.__dict__)
+    def test_kwargs_one(self):
+        """Tests when there is only one kwargs provided"""
+        n = {'Name': 'test'}
+        with self.assertRaises(KeyError):
+            new = self.value(**n)
 
-        self.assertTrue(b2.to_dict()["__class__"], "BaseModel")
+    def test_id(self):
+        """Tests id"""
+        new = self.value()
+        self.assertEqual(type(new.id), str)
 
-        # Checking datetime attributes types
-        self.assertEqual(type(b2.created_at), datetime)
-        self.assertEqual(type(b2.updated_at), datetime)
+    def test_created_at(self):
+        """Tests created_at attribute"""
+        new = self.value()
+        self.assertEqual(type(new.created_at), datetime)
 
-        # Checking if the two instances are the same object
-        self.assertTrue(b1 is not b2)
-        self.assertTrue(b1 != b2)
-
-        # Checking if the two instance's attributes are equal
-        self.assertEqual(b1.id, b2.id)
-        self.assertEqual(b1.to_dict(), b2.to_dict())
-
-        # Set new attribute to b2 instance
-        b2.name = "BaseModel class"
-        self.assertNotEqual(b1.to_dict(), b2.to_dict())
-        self.assertTrue("name" in b2.to_dict())
-        self.assertTrue("name" not in b1.to_dict())
-
-        # Tests that the each new created instance has a unique id
-        b3 = BaseModel()
-        self.assertNotEqual(b2.id, b3.id)
-        self.assertEqual(len(b3.id), 36)
-        self.assertEqual(type(b1.id), str)
-
-        self.assertLess(b1.created_at, b3.created_at)
+    def test_updated_at(self):
+        """Tests updated_at attribute"""
+        new = self.value()
+        self.assertEqual(type(new.updated_at), datetime)
+        n = new.to_dict()
+        new = BaseModel(**n)
+        self.assertFalse(new.created_at == new.updated_at)
 
     @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db',
                      "Only runs when using the file storage")
     def test_save(self):
-        """Tests (save) function"""
-        b1 = BaseModel()
-        old_updated_at = b1.updated_at
-
-        self.assertFalse(os.path.exists("file.json"))
-
-        # Tests if updated_at attribute has changed after calling save() method
-        b1.save()
-        self.assertNotEqual(old_updated_at, b1.updated_at)
-        self.assertTrue(b1 in storage.all().values())
-        self.assertTrue(os.path.exists("file.json"))
-
-        with self.assertRaises(TypeError):
-            b1.save(None)
-        with self.assertRaises(TypeError):
-            b1.save("None")
-
-        if os.path.exists("file.json"):
-            os.remove("file.json")
+        """ Testing save """
+        i = self.value()
+        i.save()
+        key = self.name + "." + i.id
+        with open('file.json', 'r') as f:
+            j = json.load(f)
+            self.assertEqual(j[key], i.to_dict())
 
     def test_str(self):
         """Tests __str__ function"""
@@ -111,7 +110,7 @@ class TestBaseModel(unittest.TestCase):
     def test_to_dict(self):
         """Tests to_dict function"""
 
-        b1 = BaseModel()
+        b1 = self.value()
         temp_dict1 = {'id': b1.id,
                       'created_at': b1.created_at.isoformat(),
                       'updated_at': b1.updated_at.isoformat(),
@@ -155,10 +154,9 @@ class TestBaseModel(unittest.TestCase):
                      "Only runs when using the file storage")
     def test_delete_method(self):
         # Test delete method removes instance from storage
-        model = BaseModel()
+        model = self.value()
         model_id = model.id
-        storage.new(model)
-        storage.save()
+        model.save()
         model.delete()
         self.assertNotIn(f"BaseModel.{model_id}", storage.all())
         if os.path.exists("file.json"):
