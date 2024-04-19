@@ -41,8 +41,6 @@ class BaseModel():
                 elif key == "created_at" or key == "updated_at":
                     setattr(self, key, datetime.fromisoformat(value))
                 else:
-                    if key not in self.__class__.__dict__:
-                        raise KeyError
                     setattr(self, key, value)
         else:
             self.id = str(uuid.uuid4())

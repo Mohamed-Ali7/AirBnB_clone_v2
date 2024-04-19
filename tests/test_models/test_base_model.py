@@ -92,6 +92,8 @@ class TestBasemodel(unittest.TestCase):
         mdl.lastname = 'Akpanoko'
         self.assertIn('firstname', mdl.to_dict())
         self.assertIn('lastname', mdl.to_dict())
+        self.assertIn('firstname', self.value(firstname='Celestine').to_dict())
+        self.assertIn('lastname', self.value(lastname='Akpanoko').to_dict())
         # Tests to_dict datetime attributes if they are strings
         self.assertIsInstance(self.value().to_dict()['created_at'], str)
         self.assertIsInstance(self.value().to_dict()['updated_at'], str)
@@ -109,10 +111,19 @@ class TestBasemodel(unittest.TestCase):
         self.assertDictEqual(mdl.to_dict(), to_dict)
         if os.getenv('HBNB_TYPE_STORAGE') != 'db':
             self.assertDictEqual(
-                self.value(id='u-b34').to_dict(),
+                self.value(id='u-b34', age=13).to_dict(),
                 {
                     '__class__': mdl.__class__.__name__,
                     'id': 'u-b34',
+                    'age': 13
+                }
+            )
+            self.assertDictEqual(
+                self.value(id='u-b34', age=None).to_dict(),
+                {
+                    '__class__': mdl.__class__.__name__,
+                    'id': 'u-b34',
+                    'age': None
                 }
             )
         # Tests to_dict output contradiction
@@ -138,6 +149,12 @@ class TestBasemodel(unittest.TestCase):
         n = {None: None}
         with self.assertRaises(TypeError):
             new = self.value(**n)
+
+    def test_kwargs_one(self):
+        """Tests kwargs with one key-value pair."""
+        n = {'Name': 'test'}
+        new = self.value(**n)
+        self.assertTrue(hasattr(new, 'Name'))
 
     def test_id(self):
         """Tests the type of id."""
