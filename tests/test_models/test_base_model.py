@@ -147,6 +147,7 @@ class TestBaseModel(unittest.TestCase):
             b1.to_dict(None)
         with self.assertRaises(TypeError):
             b1.to_dict("None")
+        self.assertNotIn('_sa_instance_state', temp_dict1)
 
     @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db',
                      "Only runs when using the file storage")
