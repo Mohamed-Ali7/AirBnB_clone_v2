@@ -9,11 +9,11 @@ package { 'nginx':
   install_options => ['-y'],
 } ->
 
-exec { '/data/web_static/releases/test/':
+exec { 'mkdir -p /data/web_static/releases/test/':
   path => '/usr/bin/:/usr/local/bin/:/bin/'
 } ->
 
-exec { '/data/web_static/shared/':
+exec { 'mkdir /data/web_static/shared/':
   path => '/usr/bin/:/usr/local/bin/:/bin/'
 } ->
 
