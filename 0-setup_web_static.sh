@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 # script that sets up web servers for the deployment of web_static
-apt-get update
-apt-get -y install nginx
+sudo apt-get update
+sudo apt-get -y install nginx
+sudo ufw allow 'Nginx HTTP'
 
-mkdir -p /data/
-mkdir -p /data/web_static/
-mkdir -p /data/web_static/releases/
-mkdir -p /data/web_static/shared/
-mkdir -p /data/web_static/releases/test/
+sudo mkdir -p /data/
+sudo mkdir -p /data/web_static/
+sudo mkdir -p /data/web_static/releases/
+sudo mkdir -p /data/web_static/shared/
+sudo mkdir -p /data/web_static/releases/test/
 echo "Hello World!" > /data/web_static/releases/test/index.html
 
-ln -sf /data/web_static/releases/test/ /data/web_static/current
+sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 
 sudo chown -R ubuntu:ubuntu /data/
 
@@ -19,8 +20,8 @@ new="\n\
 \t\talias /data/web_static/current/;\n\
 \t}
 "
-sed -i "/listen \[::\]:80 default_server;/a\ $new" /etc/nginx/sites-available/default
+sudo sed -i "/listen \[::\]:80 default_server;/a\ $new" /etc/nginx/sites-available/default
 
-ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-service nginx restart
+sudo service nginx restart
