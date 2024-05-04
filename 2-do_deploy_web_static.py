@@ -3,7 +3,6 @@
 """This module contains do_pack() and do_deploy() functions"""
 
 from fabric.api import *
-from datetime import datetime
 import os
 
 
