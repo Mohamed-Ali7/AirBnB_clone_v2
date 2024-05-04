@@ -4,6 +4,7 @@
 
 
 import os
+import sys
 from fabric.api import *
 
 
@@ -18,22 +19,13 @@ def do_clean(number=0):
     """
 
     number = int(number)
-
     if number == 0:
-        number = 1
+        number = 2
+    else:
+        number += 1
 
-    local_archives = local("ls -t versions", capture=True).split()
-    for archive in local_archives[number:]:
-        local(f"rm versions/{archive}")
-
-    unknown_files = run("ls /data/web_static/releases/ | grep -v web_static*", warn_only=True)
-    if unknown_files:
-        unknown_files = unknown_files.split()
-    for file in unknown_files:
-        run(f"rm -rf /data/web_static/releases/{file}")
-
-    remote_archives = run("ls -t /data/web_static/releases | grep web_static*")
-    remote_archives = remote_archives.split()
-    for archive in remote_archives[number:]:
-        if archive.startswith("web_static_"):
-            run(f"rm -rf /data/web_static/releases/{archive}")
+    local('cd versions; ls -t | tail -n +{} | xargs rm -rf'
+          .format(number))
+    releases_path = '/data/web_static/releases'
+    run('cd {}; ls -t | tail -n +{} | xargs rm -rf'
+        .format(releases_path, number))
