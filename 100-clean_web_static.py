@@ -17,16 +17,15 @@ def do_clean(number=0):
         number (int): The number of archives to keep.
     """
 
-    number = int(number)
+    number = 1 if int(number) == 0 else int(number)
 
-    if number == 0:
-        number = 1
+    archives = sorted(os.listdir("versions"))
+    [archives.pop() for i in range(number)]
+    with lcd("versions"):
+        [local("rm ./{}".format(a)) for a in archives]
 
-    local_archives = local("ls -t versions || true", capture=True).split()
-    for archive in local_archives[number:]:
-        local("rm -f versions/{}".format(archive))
-
-    remote_archives = run("ls -t /data/web_static/releases/ | grep web_stat*")
-    remote_archives = remote_archives.split()
-    for archive in remote_archives[number:]:
-        run("sudo rm -rf /data/web_static/releases/{}".format(archive))
+    with cd("/data/web_static/releases"):
+        archives = run("ls -tr").split()
+        archives = [a for a in archives if "web_static_" in a]
+        [archives.pop() for i in range(number)]
+        [run("rm -rf ./{}".format(a)) for a in archives]
