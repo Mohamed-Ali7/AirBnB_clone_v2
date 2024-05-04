@@ -2,7 +2,7 @@
 
 """This module contains do_pack() and do_deploy() functions"""
 
-from fabric.api import put, run, env
+from fabric.api import *
 import os
 
 
@@ -17,21 +17,21 @@ def do_deploy(archive_path):
             return False
 
         archive_name = archive_path.split("/")[-1]
-        web_path = f"/data/web_static/releases/{archive_name.split('.')[0]}"
+        web_path = "/data/web_static/releases/{}".format(archive_name.split('.')[0])
 
         put(archive_path, "/tmp/")
 
-        run(f"mkdir -p {web_path}")
+        run("mkdir -p {}".format(web_path))
 
-        run(f"tar -xzf /tmp/{archive_name} -C {web_path}")
-        run(f"rm /tmp/{archive_name}")
+        run("tar -xzf /tmp/{} -C {}".format(archive_name, web_path))
+        run("rm /tmp/{}".format(archive_name))
 
-        run(f"mv {web_path}/web_static/* {web_path}")
+        run("mv {}/web_static/* {}".format(web_path, web_path))
 
-        run(f"rm -rf {web_path}/web_static")
+        run("rm -rf {}/web_static".format(web_path))
 
-        run(f"rm -rf /data/web_static/current")
-        run(f"ln -sf {web_path} /data/web_static/current")
+        run("rm -rf /data/web_static/current")
+        run("ln -sf {} /data/web_static/current".format(web_path))
         return True
     except:
         return False
