@@ -2,7 +2,7 @@
 
 """This module contains do_pack() and do_deploy() functions"""
 
-from fabric.api import *
+from fabric.api import put, run, env
 import os
 
 
