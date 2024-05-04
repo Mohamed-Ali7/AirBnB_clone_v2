@@ -3,7 +3,7 @@
 """This module contains do_clean() function"""
 
 
-import sys
+import os
 from fabric.api import *
 
 
@@ -26,4 +26,7 @@ def do_clean(number=0):
     for archive in local_archives[number:]:
         local(f"rm versions/{archive}")
 
-    sys.exit(0)
+    remote_archives = run("ls -t /data/web_static/releases | grep web_static*")
+    remote_archives = remote_archives.split()
+    for archive in remote_archives[number:]:
+        run(f"rm -rf /data/web_static/releases/{archive}")
