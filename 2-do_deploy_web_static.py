@@ -34,20 +34,19 @@ def do_deploy(archive_path):
         put(archive_path, "/tmp/")
 
         archive_name = archive_path.split("/")[-1]
+        web_path = f"/data/web_static/releases/{archive_name.split('.')[0]}"
 
-        run(f"mkdir -p /data/web_static/releases/{archive_name[:-4]}")
+        run(f"mkdir -p {web_path}")
 
-        run("tar -xzf /tmp/{} -C /data/web_static/releases/{}"
-            .format(archive_name, archive_name[:-4]))
+        run(f"tar -xzf /tmp/{archive_name} -C {web_path}")
         run(f"rm /tmp/{archive_name}")
 
-        run(f"mv /data/web_static/releases/{archive_name[:-4]}/web_static/*\
-            /data/web_static/releases/{archive_name[:-4]}")
-        run(f"rm -rf /data/web_static/releases/{archive_name[:-4]}/web_static")
+        run(f"mv {web_path}/web_static/* {web_path}")
+
+        run(f"rm -rf {web_path}/web_static")
 
         run(f"rm -rf /data/web_static/current")
-        run(f"ln -s /data/web_static/releases/{archive_name[:-4]}\
-            /data/web_static/current")
+        run(f"ln -s {web_path} /data/web_static/current")
 
         return True
     except:
