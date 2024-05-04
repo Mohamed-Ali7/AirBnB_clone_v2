@@ -34,9 +34,9 @@ def do_deploy(archive_path):
 
     archive_name = archive_path.split("/")[-1]
 
-    run(f"sudo mkdir -p /data/web_static/releases/{archive_name[:-4]}")
+    run(f"mkdir -p /data/web_static/releases/{archive_name[:-4]}")
 
-    run("ar -xzf /tmp/{} -C /data/web_static/releases/{}"
+    run("tar -xzf /tmp/{} -C /data/web_static/releases/{}"
         .format(archive_name, archive_name[:-4]))
     run(f"rm /tmp/{archive_name}")
 
