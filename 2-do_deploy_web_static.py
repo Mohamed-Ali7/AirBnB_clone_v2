@@ -30,20 +30,25 @@ def do_deploy(archive_path):
     if not os.path.exists(archive_path):
         return False
 
-    put(archive_path, "/tmp/")
+    try:
+        put(archive_path, "/tmp/")
 
-    archive_name = archive_path.split("/")[-1]
+        archive_name = archive_path.split("/")[-1]
 
-    run(f"mkdir -p /data/web_static/releases/{archive_name[:-4]}")
+        run(f"mkdir -p /data/web_static/releases/{archive_name[:-4]}")
 
-    run("tar -xzf /tmp/{} -C /data/web_static/releases/{}"
-        .format(archive_name, archive_name[:-4]))
-    run(f"rm /tmp/{archive_name}")
+        run("tar -xzf /tmp/{} -C /data/web_static/releases/{}"
+            .format(archive_name, archive_name[:-4]))
+        run(f"rm /tmp/{archive_name}")
 
-    run(f"mv /data/web_static/releases/{archive_name[:-4]}/web_static/*\
-           /data/web_static/releases/{archive_name[:-4]}")
-    run(f"rm -rf /data/web_static/releases/{archive_name[:-4]}/web_static")
+        run(f"mv /data/web_static/releases/{archive_name[:-4]}/web_static/*\
+            /data/web_static/releases/{archive_name[:-4]}")
+        run(f"rm -rf /data/web_static/releases/{archive_name[:-4]}/web_static")
 
-    run(f"rm -rf /data/web_static/current")
-    run(f"ln -s /data/web_static/releases/{archive_name[:-4]}\
-         /data/web_static/current")
+        run(f"rm -rf /data/web_static/current")
+        run(f"ln -s /data/web_static/releases/{archive_name[:-4]}\
+            /data/web_static/current")
+
+        return True
+    except Exception as e:
+        return False
