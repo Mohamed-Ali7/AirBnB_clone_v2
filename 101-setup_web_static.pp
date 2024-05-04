@@ -30,7 +30,7 @@ file { '/data/web_static/current':
 } ->
 
 exec { 'change_owner':
-  command => 'chown -hR mohamed:mohamed /data/',
+  command => 'chown -hR ubuntu:ubuntu /data/',
   path    => '/usr/bin/:/usr/local/bin/:/bin/',
 } ->
 
