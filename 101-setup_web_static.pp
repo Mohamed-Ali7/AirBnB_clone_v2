@@ -9,29 +9,17 @@ package { 'nginx':
   install_options => ['-y'],
 } ->
 
-file { '/data':
-  ensure  => 'directory'
+exec { '/data/web_static/releases/test/':
+  path => '/usr/bin/:/usr/local/bin/:/bin/'
 } ->
 
-file { '/data/web_static':
-  ensure => 'directory'
-} ->
-
-file { '/data/web_static/releases':
-  ensure => 'directory'
-} ->
-
-file { '/data/web_static/releases/test':
-  ensure => 'directory'
-} ->
-
-file { '/data/web_static/shared':
-  ensure => 'directory'
+exec { '/data/web_static/shared/':
+  path => '/usr/bin/:/usr/local/bin/:/bin/'
 } ->
 
 file { '/data/web_static/releases/test/index.html':
   ensure  => 'present',
-  content => "Holberton School Puppet\n"
+  content => "Hello World!"
 } ->
 
 file { '/data/web_static/current':
