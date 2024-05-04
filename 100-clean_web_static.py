@@ -3,7 +3,6 @@
 """This module contains do_clean() function"""
 
 
-import os
 import sys
 from fabric.api import *
 
@@ -19,13 +18,12 @@ def do_clean(number=0):
     """
 
     number = int(number)
-    if number == 0:
-        number = 2
-    else:
-        number += 1
 
-    local('cd versions; ls -t | tail -n +{} | xargs rm -rf'
-          .format(number))
-    releases_path = '/data/web_static/releases'
-    run('cd {}; ls -t | tail -n +{} | xargs rm -rf'
-        .format(releases_path, number))
+    if number == 0:
+        number = 1
+
+    local_archives = local("ls -t versions", capture=True).split()
+    for archive in local_archives[number:]:
+        local(f"rm versions/{archive}")
+
+    sys.exit(0)
