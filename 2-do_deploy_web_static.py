@@ -15,10 +15,13 @@ def do_deploy(archive_path):
     try:
         if not os.path.exists(archive_path):
             return False
-        put(archive_path, "/tmp/")
 
         archive_name = archive_path.split("/")[-1]
         web_path = f"/data/web_static/releases/{archive_name.split('.')[0]}"
+
+        if run(f"mkdir {web_path}").failed is True:
+            return False
+        put(archive_path, "/tmp/")
 
         run(f"mkdir -p {web_path}")
 
