@@ -38,7 +38,7 @@ file { '/data/web_static/current':
 
 exec { 'chown -R ubuntu:ubuntu /data/':
   path => '/usr/bin/:/usr/local/bin/:/bin/'
-}
+} ->
 
 file_line { 'add_alias':
   ensure => 'present',
