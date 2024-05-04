@@ -18,3 +18,4 @@ def do_pack():
 
     if result.succeeded:
         return f"versions/{archive_name}"
+    return None
