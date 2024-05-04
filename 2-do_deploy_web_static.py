@@ -32,7 +32,7 @@ def do_deploy(archive_path):
 
         run(f"rm -rf /data/web_static/current")
         run(f"ln -sf {web_path} /data/web_static/current")
-        run(f"touch /data/web_static/current/my_index.html")
+        run(f"service nginx restart")
         print("New version deployed!")
         return True
     except:
