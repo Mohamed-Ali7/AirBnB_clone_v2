@@ -23,7 +23,7 @@ def do_deploy(archive_path):
 
         run("mkdir -p {}".format(web_path))
 
-        run("tar -xzf /tmp/{} -C {}".format(archive_name, web_path))
+        run("tar -xzf /tmp/{} -C {}/".format(archive_name, web_path))
         run("rm /tmp/{}".format(archive_name))
 
         run("mv {}/web_static/* {}".format(web_path, web_path))
@@ -31,7 +31,7 @@ def do_deploy(archive_path):
         run("rm -rf {}/web_static".format(web_path))
 
         run("rm -rf /data/web_static/current")
-        run("ln -sf {} /data/web_static/current".format(web_path))
+        run("ln -sf {}/ /data/web_static/current".format(web_path))
         return True
     except:
         return False
