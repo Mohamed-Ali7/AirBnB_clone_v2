@@ -19,8 +19,6 @@ def do_deploy(archive_path):
         archive_name = archive_path.split("/")[-1]
         web_path = f"/data/web_static/releases/{archive_name.split('.')[0]}"
 
-        if not run(f"test -d {web_path}"):
-            return False
         put(archive_path, "/tmp/")
 
         run(f"mkdir -p {web_path}")
@@ -33,7 +31,8 @@ def do_deploy(archive_path):
         run(f"rm -rf {web_path}/web_static")
 
         run(f"rm -rf /data/web_static/current")
-        run(f"ln -s {web_path} /data/web_static/current")
+        run(f"ln -sf {web_path} /data/web_static/current")
+        run(f"touch /data/web_static/current/my_index.html")
         print("New version deployed!")
         return True
     except:
