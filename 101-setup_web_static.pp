@@ -24,8 +24,8 @@ $nginx_conf = "server {
 }"
 
 package { 'nginx':
-  ensure   => installed,
-  provider => 'apt',
+  ensure   => 'present',
+  provider => 'apt'
 } ->
 
 file { '/data':
