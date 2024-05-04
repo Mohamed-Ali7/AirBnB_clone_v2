@@ -17,7 +17,8 @@ def do_deploy(archive_path):
             return False
 
         archive_name = archive_path.split("/")[-1]
-        web_path = "/data/web_static/releases/{}".format(archive_name.split('.')[0])
+        web_path = "/data/web_static/releases/{}"\
+            .format(archive_name.split('.')[0])
 
         put(archive_path, "/tmp/")
 
