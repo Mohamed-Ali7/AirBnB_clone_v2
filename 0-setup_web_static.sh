@@ -9,9 +9,16 @@ sudo mkdir -p /data/web_static/
 sudo mkdir -p /data/web_static/releases/
 sudo mkdir -p /data/web_static/shared/
 sudo mkdir -p /data/web_static/releases/test/
-echo "Hello World!" > /data/web_static/releases/test/index.html
+sudo touch /data/web_static/releases/test/index.html
+sudo echo "<html>
+  <head>
+  </head>
+  <body>
+    Holberton School
+  </body>
+</html>" | sudo tee /data/web_static/releases/test/index.html
 
-sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
+sudo ln -s -f /data/web_static/releases/test/ /data/web_static/current
 
 sudo chown -R ubuntu:ubuntu /data/
 
@@ -20,8 +27,8 @@ new="\n\
 \t\talias /data/web_static/current/;\n\
 \t}
 "
-sudo sed -i "/listen \[::\]:80 default_server;/a\ $new" /etc/nginx/sites-available/default
+sed -i "/listen \[::\]:80 default_server;/a\ $new" /etc/nginx/sites-available/default
 
-sudo ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
-sudo service nginx restart
+service nginx restart
