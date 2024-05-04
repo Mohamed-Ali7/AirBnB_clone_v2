@@ -19,7 +19,7 @@ def do_deploy(archive_path):
         archive_name = archive_path.split("/")[-1]
         web_path = f"/data/web_static/releases/{archive_name.split('.')[0]}"
 
-        if run(f"mkdir {web_path}").failed is True:
+        if not run(f"test -d {web_path}"):
             return False
         put(archive_path, "/tmp/")
 
