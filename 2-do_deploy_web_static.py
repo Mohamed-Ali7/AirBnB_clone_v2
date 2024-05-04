@@ -15,9 +15,6 @@ def do_deploy(archive_path):
     try:
         if not os.path.exists(archive_path):
             return False
-        
-        local("eval $(ssh-agent)")
-        local("ssh-add")
         put(archive_path, "/tmp/")
 
         archive_name = archive_path.split("/")[-1]
