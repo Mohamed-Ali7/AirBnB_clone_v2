@@ -1,37 +1,33 @@
 #!/usr/bin/python3
+"""
+Deletes out-of-date archives
+fab -f 100-clean_web_static.py do_clean:number=2
+    -i ssh-key -u ubuntu > /dev/null 2>&1
+"""
 
-"""This module contains do_pack() and do_deploy() functions"""
-
-from fabric.api import *
 import os
+from fabric.api import *
+
+env.hosts = ['52.87.155.66', '54.89.109.87']
 
 
-env.hosts = ['54.208.120.231', '54.89.61.73']
+def do_clean(number=0):
+    """Delete out-of-date archives.
+    Args:
+        number (int): The number of archives to keep.
+    If number is 0 or 1, keeps only the most recent archive. If
+    number is 2, keeps the most and second-most recent archives,
+    etc.
+    """
+    number = 1 if int(number) == 0 else int(number)
 
+    archives = sorted(os.listdir("versions"))
+    [archives.pop() for i in range(number)]
+    with lcd("versions"):
+        [local("rm ./{}".format(a)) for a in archives]
 
-def do_deploy(archive_path):
-    """Distributes an archive to a web servers"""
-
-    try:
-        if not os.path.exists(archive_path):
-            return False
-
-        archive_name = archive_path.split("/")[-1]
-        web_path = f"/data/web_static/releases/{archive_name.split('.')[0]}"
-
-        put(archive_path, "/tmp/")
-
-        run(f"mkdir -p {web_path}")
-
-        run(f"tar -xzf /tmp/{archive_name} -C {web_path}")
-        run(f"rm /tmp/{archive_name}")
-
-        run(f"mv {web_path}/web_static/* {web_path}")
-
-        run(f"rm -rf {web_path}/web_static")
-
-        run(f"rm -rf /data/web_static/current")
-        run(f"ln -sf {web_path} /data/web_static/current")
-        return True
-    except:
-        return False
+    with cd("/data/web_static/releases"):
+        archives = run("ls -tr").split()
+        archives = [a for a in archives if "web_static_" in a]
+        [archives.pop() for i in range(number)]
+        [run("rm -rf ./{}".format(a)) for a in archives]
