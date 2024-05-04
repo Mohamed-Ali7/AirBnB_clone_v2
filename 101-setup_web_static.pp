@@ -1,31 +1,12 @@
 # Puppet script to install and configure an Nginx server
 
-$nginx_conf = "server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
-    add_header X-Served-By ${hostname};
-    root   /var/www/html;
-    index  index.html index.htm;
-
-    location /hbnb_static {
-        alias /data/web_static/current;
-        index index.html index.htm;
-    }
-
-    location /redirect_me {
-        return 301 http://cuberule.com/;
-    }
-
-    error_page 404 /404.html;
-    location /404 {
-      root /var/www/html;
-      internal;
-    }
-}"
+$alias='\tlocation /hbnb_static {\n\t\talias /data/web_static/current/;\n\t}'
+$after_line='listen \[::\]:80 default_server;'
 
 package { 'nginx':
-  ensure   => 'present',
-  provider => 'apt'
+  ensure          => installed,
+  provider        => 'apt',
+  install_options => ['-y'],
 } ->
 
 file { '/data':
@@ -58,13 +39,13 @@ file { '/data/web_static/current':
   target => '/data/web_static/releases/test'
 } ->
 
-exec { 'chown -R mohamed:mohamed /data/':
+exec { 'chown -R ubuntu:ubuntu /data/':
   path => '/usr/bin/:/usr/local/bin/:/bin/'
 } ->
 
-file { '/etc/nginx/sites-available/default':
-  ensure  => 'present',
-  content => $nginx_conf
+exec { 'add_alias':
+  command => "sed -i '/${after_line}/a\ ${alias}' /etc/nginx/sites-available/default",
+  path    => '/usr/bin/:/usr/local/bin/:/bin/',
 } ->
 
 service { 'nginx':
