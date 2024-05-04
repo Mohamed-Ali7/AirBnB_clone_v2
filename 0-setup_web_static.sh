@@ -18,4 +18,6 @@ new="\n\
 "
 sed -i "/listen \[::\]:80 default_server;/a\ $new" /etc/nginx/sites-available/default
 
+ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+
 service nginx restart
