@@ -55,7 +55,9 @@ def do_deploy(archive_path):
 def deploy():
     """Creates and distributes an archive to a web servers"""
 
-    archive = do_pack()
-    if archive is None:
+    if not hasattr(deploy, 'archive_path'):
+        deploy.archive_path = do_pack()
+    if not deploy.archive_path:
         return False
-    return do_deploy(archive)
+
+    return do_deploy(deploy.archive_path)
