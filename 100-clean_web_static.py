@@ -26,8 +26,13 @@ def do_clean(number=0):
     for archive in local_archives[number:]:
         local(f"rm versions/{archive}")
 
+    unknown_files = run("ls /data/web_static/releases/ | grep -v web_static*")
+    unknown_files = unknown_files.split()
+    for file in unknown_files:
+        run(f"rm -rf /data/web_static/releases/{file}")
+
     remote_archives = run("ls -t /data/web_static/releases | grep web_static*")
     remote_archives = remote_archives.split()
     for archive in remote_archives[number:]:
-        if archive.startswith("web_static"):
+        if archive.startswith("web_static_"):
             run(f"rm -rf /data/web_static/releases/{archive}")
