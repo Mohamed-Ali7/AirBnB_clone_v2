@@ -1,5 +1,8 @@
 # Puppet script to install and configure an Nginx server
 
+$alias='\tlocation /hbnb_static {\n\t\talias /data/web_static/current/;\n\t}'
+$after_line='listen \[::\]:80 default_server;'
+
 package { 'nginx':
   ensure          => installed,
   provider        => 'apt',
@@ -36,15 +39,13 @@ file { '/data/web_static/current':
   target => '/data/web_static/releases/test'
 } ->
 
-exec { 'chown -R ubuntu:ubuntu /data/':
+exec { 'chown -R mohamed:mohamed /data/':
   path => '/usr/bin/:/usr/local/bin/:/bin/'
 } ->
 
-file_line { 'add_alias':
-  ensure => 'present',
-  path   => '/etc/nginx/sites-available/default',
-  after  => 'listen \[::\]:80 default_server;',
-  line   => "\tlocation /hbnb_static {\n\t\talias /data/web_static/current/;\n\t}",
+exec { 'add_alias':
+  command => "sed -i '/${after_line}/a\ ${alias}' /etc/nginx/sites-available/default",
+  path    => '/usr/bin/:/usr/local/bin/:/bin/',
 } ->
 
 service { 'nginx':
