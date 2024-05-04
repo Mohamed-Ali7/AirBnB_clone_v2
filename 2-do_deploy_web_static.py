@@ -12,27 +12,21 @@ env.hosts = ['54.208.120.231', '54.89.61.73']
 def do_deploy(archive_path):
     """Distributes an archive to a web servers"""
 
-    if not os.path.exists(archive_path):
+    if os.path.exists(archive_path) is False:
         return False
+    filename = archive_path.split('/')[-1]
+    no_tgz = '/data/web_static/releases/' + "{}".format(filename.split('.')[0])
+    tmp = "/tmp/" + filename
 
     try:
         put(archive_path, "/tmp/")
-
-        archive_name = archive_path.split("/")[-1]
-        web_path = f"/data/web_static/releases/{archive_name.split('.')[0]}"
-
-        run(f"mkdir -p {web_path}")
-
-        run(f"tar -xzf /tmp/{archive_name} -C {web_path}")
-        run(f"rm /tmp/{archive_name}")
-
-        run(f"mv {web_path}/web_static/* {web_path}")
-
-        run(f"rm -rf {web_path}/web_static")
-
-        run(f"rm -rf /data/web_static/current")
-        run(f"ln -s {web_path} /data/web_static/current")
-
+        run("mkdir -p {}/".format(no_tgz))
+        run("tar -xzf {} -C {}/".format(tmp, no_tgz))
+        run("rm {}".format(tmp))
+        run("mv {}/web_static/* {}/".format(no_tgz, no_tgz))
+        run("rm -rf {}/web_static".format(no_tgz))
+        run("rm -rf /data/web_static/current")
+        run("ln -s {}/ /data/web_static/current".format(no_tgz))
         return True
     except:
         return False
