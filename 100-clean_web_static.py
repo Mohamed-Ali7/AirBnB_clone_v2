@@ -19,6 +19,9 @@ def do_clean(number=0):
         number (int): The number of archives to keep.
     """
 
+    local('eval $(ssh-agent)')
+    local('ssh-add')
+
     number = int(number)
 
     if number == 0:
