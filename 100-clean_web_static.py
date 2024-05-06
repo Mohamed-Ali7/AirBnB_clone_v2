@@ -26,7 +26,7 @@ def do_clean(number=0):
             for archive in archives[number:]:
                 run('rm -rf {}'.format(archive))
         with lcd('versions'):
-            archives = local('ls -t').split()
+            archives = local('ls -t', capture=True).split()
             for archive in archives[number:]:
                 local('rm -rf {}'.format(archive))
     except:
