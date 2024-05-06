@@ -26,8 +26,7 @@ def do_clean(number=0):
     for archive in local_archives[number:]:
         local("rm -f versions/{}".format(archive))
 
-    remote_archives = run("ls -t /data/web_static/releases/ | grep web_stat*\
-                          || true")
+    remote_archives = run("ls -t /data/web_static/releases/ | grep web_stat*")
     remote_archives = remote_archives.split()
     for archive in remote_archives[number:]:
         sudo("rm -rf /data/web_static/releases/{}".format(archive))
