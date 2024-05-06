@@ -7,8 +7,6 @@ import os
 from fabric.api import *
 
 
-env.user = 'ubuntu'
-env.key_filename = '~/.ssh/id_rsa'
 env.hosts = ['54.208.120.231', '54.89.61.73']
 
 
@@ -19,9 +17,6 @@ def do_clean(number=0):
         number (int): The number of archives to keep.
     """
 
-    local('eval $(ssh-agent)')
-    local('ssh-add')
-
     number = int(number)
 
     if number == 0:
@@ -31,7 +26,8 @@ def do_clean(number=0):
     for archive in local_archives[number:]:
         local("rm -f versions/{}".format(archive))
 
-    remote_archives = run("ls -t /data/web_static/releases/ | grep web_stat*")
+    remote_archives = run("ls -t /data/web_static/releases/ | grep web_stat*\
+                          || true")
     remote_archives = remote_archives.split()
     for archive in remote_archives[number:]:
         sudo("rm -rf /data/web_static/releases/{}".format(archive))
