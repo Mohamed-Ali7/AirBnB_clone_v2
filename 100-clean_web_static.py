@@ -25,9 +25,9 @@ def do_clean(number=0):
             archives = run('ls -t').split()
             for archive in archives[number:]:
                 run('rm -rf {}'.format(archive))
-        with cd('versions'):
+        with lcd('versions'):
             archives = run('ls -t').split()
             for archive in archives[number:]:
                 run('rm -rf {}'.format(archive))
     except:
-        return True
+        return False
