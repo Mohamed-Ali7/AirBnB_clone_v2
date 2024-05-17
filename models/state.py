@@ -24,10 +24,11 @@ class State(BaseModel, Base):
             """
 
             cities = models.storage.all(City)
+            
             state_cities = []
 
             for value in cities.values():
                 if value.state_id == self.id:
-                    state_cities.append(City(**value))
+                    state_cities.append(value)
 
             return state_cities
