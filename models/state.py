@@ -24,7 +24,7 @@ class State(BaseModel, Base):
             """
 
             cities = models.storage.all(City)
-            
+
             state_cities = []
 
             for value in cities.values():
