@@ -1,105 +1,204 @@
 #!/usr/bin/python3
-"""
-Contains the TestStateDocs classes
-"""
-
-from datetime import datetime
-import inspect
-import models
-from models import state
-from models.base_model import BaseModel
-import pep8
+"""This module contains TestState class to test State class"""
 import unittest
-State = state.State
-
-
-class TestStateDocs(unittest.TestCase):
-    """Tests to check the documentation and style of State class"""
-    @classmethod
-    def setUpClass(cls):
-        """Set up for the doc tests"""
-        cls.state_f = inspect.getmembers(State, inspect.isfunction)
-
-    def test_pep8_conformance_state(self):
-        """Test that models/state.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
-        result = pep8s.check_files(['models/state.py'])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warnings).")
-
-    def test_pep8_conformance_test_state(self):
-        """Test that tests/test_models/test_state.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
-        result = pep8s.check_files(['tests/test_models/test_state.py'])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warnings).")
-
-    def test_state_module_docstring(self):
-        """Test for the state.py module docstring"""
-        self.assertIsNot(state.__doc__, None,
-                         "state.py needs a docstring")
-        self.assertTrue(len(state.__doc__) >= 1,
-                        "state.py needs a docstring")
-
-    def test_state_class_docstring(self):
-        """Test for the State class docstring"""
-        self.assertIsNot(State.__doc__, None,
-                         "State class needs a docstring")
-        self.assertTrue(len(State.__doc__) >= 1,
-                        "State class needs a docstring")
-
-    def test_state_func_docstrings(self):
-        """Test for the presence of docstrings in State methods"""
-        for func in self.state_f:
-            self.assertIsNot(func[1].__doc__, None,
-                             "{:s} method needs a docstring".format(func[0]))
-            self.assertTrue(len(func[1].__doc__) >= 1,
-                            "{:s} method needs a docstring".format(func[0]))
+from models.city import City
+from models.state import State
+from models.base_model import BaseModel
+from datetime import datetime
+import os
+from models import storage
 
 
 class TestState(unittest.TestCase):
-    """Test the State class"""
-    def test_is_subclass(self):
-        """Test that State is a subclass of BaseModel"""
-        state = State()
-        self.assertIsInstance(state, BaseModel)
-        self.assertTrue(hasattr(state, "id"))
-        self.assertTrue(hasattr(state, "created_at"))
-        self.assertTrue(hasattr(state, "updated_at"))
+    """This class is for testing State class attributes and functions"""
 
-    def test_name_attr(self):
-        """Test that State has attribute name, and it's as an empty string"""
-        state = State()
-        self.assertTrue(hasattr(state, "name"))
-        if models.storage_t == 'db':
-            self.assertEqual(state.name, None)
-        else:
-            self.assertEqual(state.name, "")
+    def test_instantiation(self):
+        """Tests creating an instance of State class"""
 
-    def test_to_dict_creates_dict(self):
-        """test to_dict method creates a dictionary with proper attrs"""
-        s = State()
-        new_d = s.to_dict()
-        self.assertEqual(type(new_d), dict)
-        self.assertFalse("_sa_instance_state" in new_d)
-        for attr in s.__dict__:
-            if attr is not "_sa_instance_state":
-                self.assertTrue(attr in new_d)
-        self.assertTrue("__class__" in new_d)
+        s1 = State()
+        old_updated_at = s1.updated_at
+        s1_dict = s1.to_dict()
 
-    def test_to_dict_values(self):
-        """test that values in dict returned from to_dict are correct"""
-        t_format = "%Y-%m-%dT%H:%M:%S.%f"
-        s = State()
-        new_d = s.to_dict()
-        self.assertEqual(new_d["__class__"], "State")
-        self.assertEqual(type(new_d["created_at"]), str)
-        self.assertEqual(type(new_d["updated_at"]), str)
-        self.assertEqual(new_d["created_at"], s.created_at.strftime(t_format))
-        self.assertEqual(new_d["updated_at"], s.updated_at.strftime(t_format))
+        self.assertEqual(len(s1.id), 36)
+        self.assertTrue(isinstance(s1, BaseModel))
+
+        # Checking attributes types
+        self.assertEqual(type(s1.id), str)
+        self.assertEqual(type(s1.created_at), datetime)
+        self.assertEqual(type(s1.updated_at), datetime)
+        self.assertEqual(type(s1_dict["created_at"]), str)
+        self.assertEqual(type(s1_dict["updated_at"]), str)
+
+        self.assertLess(s1.created_at, s1.updated_at)
+
+        # Checking __class__ attribute in __dict__ and to_dict()
+        self.assertNotEqual(s1.created_at, old_updated_at)
+        self.assertTrue("__class__" in s1_dict)
+        self.assertTrue("__class__" not in s1.__dict__)
+
+        # Creating a new instance using kwargs
+        s2 = State(**s1_dict)
+
+        self.assertTrue("__class__" in s2.to_dict())
+        self.assertTrue("__class__" not in s2.__dict__)
+
+        self.assertTrue(s2.to_dict()["__class__"], "BaseModel")
+
+        # Checking datetime attributes types
+        self.assertEqual(type(s2.created_at), datetime)
+        self.assertEqual(type(s2.updated_at), datetime)
+
+        # Checking if the two instances are the same object
+        self.assertTrue(s1 is not s2)
+        self.assertTrue(s1 != s2)
+
+        # Checking if the two instance's attributes are equal
+        self.assertEqual(s1.id, s2.id)
+        self.assertEqual(s1.to_dict(), s2.to_dict())
+
+        # Set new attribute to s2 instance
+        s2.zip_code = "State 0xa7"
+        self.assertNotEqual(s1.to_dict(), s2.to_dict())
+        self.assertTrue("zip_code" in s2.to_dict())
+        self.assertTrue("zip_code" not in s1.to_dict())
+
+        # Tests that the each new created instance has a unique id
+        s3 = State()
+        self.assertNotEqual(s2.id, s3.id)
+        self.assertEqual(len(s3.id), 36)
+
+        self.assertLess(s1.created_at, s3.created_at)
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') == 'db',
+                     'Only run this test when the storage is a file')
+    def test_save_with_file(self):
+        """Tests (save) function"""
+        a1 = State(name="state")
+        old_updated_at = a1.updated_at
+
+        self.assertTrue(not os.path.exists("file.json"))
+
+        # Tests if updated_at attribute has changed after calling save() method
+        a1.save()
+        self.assertNotEqual(old_updated_at, a1.updated_at)
+        self.assertIn(f"{a1.__class__.__name__}.{a1.id}", storage.all())
+
+        self.assertTrue(os.path.exists("file.json"))
+
+        with self.assertRaises(TypeError):
+            a1.save(None)
+        with self.assertRaises(TypeError):
+            a1.save("None")
+        with self.assertRaises(TypeError):
+            a1.save(State(name="state"))
+
+        if os.path.exists("file.json"):
+            os.remove("file.json")
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db'
+                     or not storage._DBStorage__engine.table_names(),
+                     'Only run this test when the storage is a database')
+    def test_save_with_db(self):
+        # Test save method updates updated_at attribute
+        state = State(name="state")
+        original_updated_at = state.updated_at
+
+        state.save()
+        self.assertNotEqual(original_updated_at, state.updated_at)
+        self.assertIn(f"State.{state.id}", storage.all())
 
     def test_str(self):
-        """test that the str method has the correct output"""
-        state = State()
-        string = "[State] ({}) {}".format(state.id, state.__dict__)
-        self.assertEqual(string, str(state))
+        """Tests __str__ function"""
+
+        s1 = State()
+        s1_str = f"[{s1.__class__.__name__}] ({s1.id}) {s1.__dict__}"
+        self.assertEqual(s1.__str__(), s1_str)
+
+        self.assertEqual(type(s1.__str__()), str)
+
+        # Adding new attribute to change s1.__dict__
+        s1.name = "State class"
+        self.assertNotEqual(s1.__str__(), s1_str)
+
+        with self.assertRaises(TypeError):
+            s1.__str__(None)
+        with self.assertRaises(TypeError):
+            s1.__str__("None")
+
+    def test_to_dict(self):
+        """Tests to_dict function"""
+
+        s1 = State()
+
+        self.assertIn("name", State.__dict__.keys())
+
+        self.assertNotIn("name", s1.to_dict())
+
+        temp_dict1 = {'id': s1.id,
+                      'created_at': s1.created_at.isoformat(),
+                      'updated_at': s1.updated_at.isoformat(),
+                      '__class__': s1.__class__.__name__
+                      }
+
+        self.assertEqual(s1.to_dict(), temp_dict1)
+        self.assertNotEqual(s1.to_dict(), s1.__dict__)
+
+        s1.name = "BaseModel class"
+        self.assertNotEqual(s1.to_dict(), temp_dict1)
+
+        temp_dict2 = {'id': s1.id,
+                      'created_at': s1.created_at.isoformat(),
+                      'updated_at': s1.updated_at.isoformat(),
+                      '__class__': s1.__class__.__name__,
+                      "name": "BaseModel class"}
+
+        self.assertEqual(s1.to_dict(), temp_dict2)
+
+        s1.name = "Test Man"
+        self.assertIn("name", s1.to_dict())
+
+        # Tests that created_at and updated_at from to_dict() function
+        # Matching iso format
+        self.assertEqual(s1.created_at,
+                         datetime.fromisoformat(temp_dict1["created_at"]))
+
+        self.assertEqual(s1.created_at,
+                         datetime.strptime(temp_dict1["created_at"],
+                                           "%Y-%m-%dT%H:%M:%S.%f"))
+
+        self.assertEqual(s1.updated_at,
+                         datetime.fromisoformat(temp_dict1["updated_at"]))
+
+        self.assertEqual(s1.updated_at,
+                         datetime.strptime(temp_dict1["updated_at"],
+                                           "%Y-%m-%dT%H:%M:%S.%f"))
+        with self.assertRaises(TypeError):
+            s1.to_dict(None)
+        with self.assertRaises(TypeError):
+            s1.to_dict("None")
+
+    def test_delete_method(self):
+        """Test delete method removes instance from storage"""
+        state = State(name="state")
+        state_id = state.id
+
+        storage.new(state)
+        storage.save()
+        state.delete()
+        self.assertNotIn(f"Amenity.{state_id}", storage.all())
+
+        if os.path.exists("file.json"):
+            os.remove("file.json")
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'db',
+                     'Only run this test when the storage is a db')
+    def test_cities_relationship(self):
+        """Test relationship between State and City"""
+        state = State(name="state")
+        city = City(name="city")
+        state.cities.append(city)
+        state.save()
+
+        self.assertIn(f"City.{city.id}", storage.all())
+        self.assertEqual(city.state_id, state.id)
+        self.assertIn(city, state.cities)

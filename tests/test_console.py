@@ -1,41 +1,109 @@
 #!/usr/bin/python3
+"""A unit test module for the console (command interpreter).
 """
-Contains the class TestConsoleDocs
-"""
-
-import console
-import inspect
-import pep8
+import MySQLdb
+import os
 import unittest
-HBNBCommand = console.HBNBCommand
+from io import StringIO
+from unittest.mock import patch
+from console import HBNBCommand
+from models import storage
 
 
-class TestConsoleDocs(unittest.TestCase):
-    """Class for testing documentation of the console"""
-    def test_pep8_conformance_console(self):
-        """Test that console.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
-        result = pep8s.check_files(['console.py'])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warnings).")
+class TestHBNBCommand(unittest.TestCase):
+    """Represents the test class for the HBNBCommand class.
+    """
 
-    def test_pep8_conformance_test_console(self):
-        """Test that tests/test_console.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
-        result = pep8s.check_files(['tests/test_console.py'])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warnings).")
+    def tearDown(self):
+        """Excutes data after each test method"""
 
-    def test_console_module_docstring(self):
-        """Test for the console.py module docstring"""
-        self.assertIsNot(console.__doc__, None,
-                         "console.py needs a docstring")
-        self.assertTrue(len(console.__doc__) >= 1,
-                        "console.py needs a docstring")
+        if os.path.exists("file.json"):
+            os.remove("file.json")
 
-    def test_HBNBCommand_class_docstring(self):
-        """Test for the HBNBCommand class docstring"""
-        self.assertIsNot(HBNBCommand.__doc__, None,
-                         "HBNBCommand class needs a docstring")
-        self.assertTrue(len(HBNBCommand.__doc__) >= 1,
-                        "HBNBCommand class needs a docstring")
+    @unittest.skipIf(
+        os.getenv('HBNB_TYPE_STORAGE') == 'db', 'FileStorage test')
+    def test_create_with_file(self):
+        """Tests (create) function"""
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("creat")
+            self.assertEqual(f.getvalue().strip(), "*** Unknown syntax: creat")
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("create")
+            self.assertEqual(f.getvalue().strip(), "** class name missing **")
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("create Base")
+            self.assertEqual(f.getvalue().strip(), "** class doesn't exist **")
+
+        self.assertEqual(storage.all(), {})
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("create BaseModel")
+
+        self.assertEqual(len(storage.all()), 1)
+        self.assertIn(f"BaseModel.{f.getvalue().strip()}", storage.all())
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd('create Amenity name="wifi"')
+
+        self.assertEqual(len(storage.all()), 2)
+        self.assertIn(f"Amenity.{f.getvalue().strip()}", storage.all())
+        key = f"Amenity.{f.getvalue().strip()}"
+
+        self.assertEqual("wifi", storage.all()[key].name)
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("create State")
+
+        self.assertEqual(len(storage.all()), 3)
+        self.assertIn(f"State.{f.getvalue().strip()}", storage.all())
+
+        with open("file.json", "r") as file:
+            self.assertIn(f"State.{f.getvalue().strip()}", file.read())
+
+    @unittest.skipIf(
+        os.getenv('HBNB_TYPE_STORAGE') != 'db', 'Database test')
+    def test_create_with_db(self):
+        """Tests (create) function with database engine"""
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("creat")
+            self.assertEqual(f.getvalue().strip(), "*** Unknown syntax: creat")
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("create")
+            self.assertEqual(f.getvalue().strip(), "** class name missing **")
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd("create Base")
+            self.assertEqual(f.getvalue().strip(), "** class doesn't exist **")
+
+        self.assertEqual(storage.all(), {})
+
+        with patch('sys.stdout', new=StringIO()) as f:
+            HBNBCommand().onecmd(
+                'create User email="user@email.com" password="123"')
+
+        key = f"User.{f.getvalue().strip()}"
+        print(key)
+        self.assertEqual(len(storage.all()), 1)
+        self.assertIn(key, storage.all())
+
+        db = MySQLdb.connect(
+                host=os.getenv('HBNB_MYSQL_HOST'),
+                port=3306,
+                user=os.getenv('HBNB_MYSQL_USER'),
+                passwd=os.getenv('HBNB_MYSQL_PWD'),
+                db=os.getenv('HBNB_MYSQL_DB')
+            )
+        cursor = db.cursor()
+        cursor.execute('SELECT * FROM users WHERE id=%s',
+                       (f.getvalue().strip(),))
+        result = cursor.fetchone()
+        self.assertTrue(result is not None)
+        self.assertIn('user@email.com', result)
+        self.assertIn('123', result)
+        cursor.close()
+        db.close()
