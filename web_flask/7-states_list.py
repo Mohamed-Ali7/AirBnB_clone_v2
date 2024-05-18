@@ -15,9 +15,7 @@ def states():
     """
     displays a HTML page that contains a list of states
     """
-    states = storage.all(State)
-    states = dict(sorted(states.items(), key=lambda item: item[1].name))
-    return render_template("7-states_list.html", states=states)
+    return render_template("7-states_list.html", states=storage.all(State))
 
 
 @app.teardown_appcontext
