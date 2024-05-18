@@ -79,12 +79,12 @@ class FileStorage:
 
     def find_by_id(self, cls, record_id):
         """Finds a record by its id"""
-
+        obj_key = "{}.{}".format(cls.__name__, record_id)
         try:
-            obj_key = "{}.{}".format(cls.__name__, record_id)
+            obj = self.__objects[obj_key]
         except KeyError as e:
             return None
-        return self.__objects[obj_key]
+        return obj
 
     def close(self):
         """calls reload() method for deserializing the JSON file to objects"""
