@@ -14,7 +14,8 @@ place_amenity = Table(
     Column("place_id", String(60), ForeignKey("places.id"),
            nullable=False, primary_key=True),
     Column("amenity_id", String(60), ForeignKey("amenities.id"),
-           nullable=False, primary_key=True)
+           nullable=False, primary_key=True),
+    mysql_charset = 'latin1'
            )
 
 
