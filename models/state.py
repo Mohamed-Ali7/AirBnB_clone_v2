@@ -6,29 +6,29 @@ import models
 import os
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
+from os import getenv
 
 
 class State(BaseModel, Base):
-    """ State class """
-    __tablename__ = "states"
-    name = Column(String(128), nullable=False)
-    cities = relationship("City", backref="state", cascade="all, delete")
+    """Representation of state """
+    if getenv("HBNB_TYPE_STORAGE") == "db":
+        __tablename__ = 'states'
+        name = Column(String(128), nullable=False)
+        cities = relationship("City", backref="state")
+    else:
+        name = ""
 
-    if os.getenv("HBNB_TYPE_STORAGE") != "db":
+    def __init__(self, *args, **kwargs):
+        """initializes state"""
+        super().__init__(*args, **kwargs)
+
+    if getenv("HBNB_TYPE_STORAGE") != "db":
         @property
         def cities(self):
-            """
-            Represents the FileStorage relationship between State and City and
-            returns the list of City instances with state_id equals
-            to the current State.id
-            """
-
-            cities = models.storage.all(City)
-
-            state_cities = []
-
-            for value in cities.values():
-                if value.state_id == self.id:
-                    state_cities.append(value)
-
-            return state_cities
+            """getter for list of city instances related to the state"""
+            city_list = []
+            all_cities = models.storage.all(City)
+            for city in all_cities.values():
+                if city.state_id == self.id:
+                    city_list.append(city)
+            return city_list
