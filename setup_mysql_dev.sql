@@ -12,3 +12,5 @@ GRANT ALL PRIVILEGES ON hbnb_dev_db.* TO 'hbnb_dev'@'localhost' WITH GRANT OPTIO
 
 -- Gives the newly created user 'hbnb_dev' SELECT privilege on the database performance_schema
 GRANT SELECT ON performance_schema.* TO 'hbnb_dev'@'localhost' WITH GRANT OPTION;
+
+FLUSH PRIVILEGES;
