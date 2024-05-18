@@ -24,7 +24,6 @@ def state(id):
     displays a HTML page that contains a list of states
     """
     state = storage.find_by_id(State, id)
-    print(state)
     return render_template("9-states.html", state=state)
 
 
