@@ -1,32 +1,30 @@
 #!/usr/bin/python3
-
-"""This module contains do_clean() function"""
-
-
+# Fabfile to delete out-of-date archives.
 import os
 from fabric.api import *
 
-
-env.hosts = ['54.208.120.231', '54.89.61.73']
+env.hosts = ["104.196.168.90", "35.196.46.172"]
 
 
 def do_clean(number=0):
-    """Deletes out-dated archives.
+    """Delete out-of-date archives.
 
     Args:
         number (int): The number of archives to keep.
+
+    If number is 0 or 1, keeps only the most recent archive. If
+    number is 2, keeps the most and second-most recent archives,
+    etc.
     """
+    number = 1 if int(number) == 0 else int(number)
 
-    number = int(number)
+    archives = sorted(os.listdir("versions"))
+    [archives.pop() for i in range(number)]
+    with lcd("versions"):
+        [local("rm ./{}".format(a)) for a in archives]
 
-    if number == 0:
-        number = 1
-
-    local_archives = local("ls -t versions || true", capture=True).split()
-    for archive in local_archives[number:]:
-        local("rm -f versions/{}".format(archive))
-
-    remote_archives = run("ls -t /data/web_static/releases/ | grep web_stat*")
-    remote_archives = remote_archives.split()
-    for archive in remote_archives[number:]:
-        sudo("rm -rf /data/web_static/releases/{}".format(archive))
+    with cd("/data/web_static/releases"):
+        archives = run("ls -tr").split()
+        archives = [a for a in archives if "web_static_" in a]
+        [archives.pop() for i in range(number)]
+        [run("rm -rf ./{}".format(a)) for a in archives]
