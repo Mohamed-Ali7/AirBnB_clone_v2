@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 """This module contains DBStorage class"""
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, exc
 from sqlalchemy.orm import sessionmaker, scoped_session
 from models.base_model import Base
 from models.user import User
@@ -87,6 +87,14 @@ class DBStorage:
 
         Session = scoped_session(session_factory)
         self.__session = Session()
+
+    def find_by_id(self, cls, record_id):
+        """Finds a record by its id"""
+
+        try:
+            return self.__session.query(cls).filter_by(id=record_id).one()
+        except exc.NoResultFound as e:
+            return None
 
     def close(self):
         """Closes the current session"""
