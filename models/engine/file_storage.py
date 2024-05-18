@@ -38,7 +38,7 @@ class FileStorage:
         (__objects) dictionary
         """
 
-        obj_key = f"{obj.__class__.__name__}.{obj.id}"
+        obj_key = "{}.{}".format(obj.__class__.__name__, obj.id)
 
         FileStorage.__objects[obj_key] = obj
 
@@ -73,7 +73,7 @@ class FileStorage:
         if obj is None:
             return
 
-        obj_key = f"{obj.__class__.__name__}.{obj.id}"
+        obj_key = "{}.{}".format(obj.__class__.__name__, obj.id)
         del FileStorage.__objects[obj_key]
         self.save()
 
