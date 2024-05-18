@@ -19,7 +19,7 @@ def states():
 
 
 @app.teardown_appcontext
-def teardown(exception=None):
+def teardown(exception):
     """Executes after each request"""
 
     storage.close()
