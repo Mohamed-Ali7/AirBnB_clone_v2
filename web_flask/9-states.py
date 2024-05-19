@@ -16,17 +16,10 @@ def list_of_states(id=None):
     """
     displays a HTML page that contains a list of states
     """
-    state = None
     states = storage.all(State)
     if id:
-        key = "State.{}".format(id)
-        try:
-            state = storage.all(State)[key]
-        except KeyError as e:
-            state = None
-        states = None
-
-    return render_template("9-states.html", states=states, state=state)
+        id = "State.{}".format(id)
+    return render_template("9-states.html", states=states, state_id=id)
 
 
 @app.teardown_appcontext
