@@ -17,9 +17,11 @@ def list_of_states(id=None):
     displays a HTML page that contains a list of states
     """
     states = storage.all(State)
+    state = None
     if id:
-        id = "State.{}".format(id)
-    return render_template("9-states.html", states=states, state_id=id)
+        state = storage.find_by_id(State, id)
+        states = None
+    return render_template("9-states.html", states=states, state=state)
 
 
 @app.teardown_appcontext
