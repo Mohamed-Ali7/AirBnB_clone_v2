@@ -11,21 +11,18 @@ app = Flask(__name__)
 
 
 @app.route("/states", strict_slashes=False)
-def list_of_states():
-    """
-    displays a HTML page that contains a list of states
-    """
-    return render_template("9-states.html", states=storage.all(State),
-                           state=None)
-
-
 @app.route("/states/<id>", strict_slashes=False)
-def state(id):
+def list_of_states(id=None):
     """
     displays a HTML page that contains a list of states
     """
-    state = storage.find_by_id(State, id)
-    return render_template("9-states.html", state=state, states=None)
+    state = None
+    states = storage.all(State)
+    if id:
+        state = storage.find_by_id(State, id)
+        states = None
+
+    return render_template("9-states.html", states=states, state=state)
 
 
 @app.teardown_appcontext
