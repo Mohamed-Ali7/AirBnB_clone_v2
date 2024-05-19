@@ -19,7 +19,11 @@ def list_of_states(id=None):
     state = None
     states = storage.all(State)
     if id:
-        state = storage.find_by_id(State, id)
+        key = "State.{}".format(id)
+        try:
+            state = storage.all(State)[key]
+        except KeyError as e:
+            state = None
         states = None
 
     return render_template("9-states.html", states=states, state=state)
