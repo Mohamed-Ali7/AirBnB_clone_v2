@@ -15,7 +15,8 @@ def list_of_states():
     """
     displays a HTML page that contains a list of states
     """
-    return render_template("9-states.html", states=storage.all(State))
+    return render_template("9-states.html", states=storage.all(State),
+                           state=None)
 
 
 @app.route("/states/<id>", strict_slashes=False)
@@ -23,12 +24,8 @@ def state(id):
     """
     displays a HTML page that contains a list of states
     """
-    state_key = "State.{}".format(id)
-    try:
-        state = storage.all(State)[state_key]
-    except KeyError as e:
-        state = None
-    return render_template("9-states.html", state=state)
+    state = storage.find_by_id(State, id)
+    return render_template("9-states.html", state=state, states=None)
 
 
 @app.teardown_appcontext
