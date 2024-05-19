@@ -81,7 +81,7 @@ class FileStorage:
         """Finds a record by its id"""
         obj_key = "{}.{}".format(cls.__name__, record_id)
         try:
-            obj = self.__objects[obj_key]
+            obj = FileStorage.__objects[obj_key]
         except KeyError as e:
             return None
         return obj

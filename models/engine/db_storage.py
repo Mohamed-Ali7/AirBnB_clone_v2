@@ -92,7 +92,7 @@ class DBStorage:
         """Finds a record by its id"""
 
         try:
-            return self.__session.query(cls).filter_by(id=record_id).one()
+            return self.__session.query(cls).filter_by(id=record_id).first()
         except exc.NoResultFound as e:
             return None
 
