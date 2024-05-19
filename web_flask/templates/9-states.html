@@ -6,18 +6,18 @@
 </HEAD>
 
 <BODY>
-    {% if not state and states %}
+    {% if not state_id %}
     <H1>States</H1>
     <UL>
         {% for state in states.values()|sort(attribute='name') %}
             <LI>{{ state.id }}: <B>{{ state.name }}</B></LI>
         {% endfor %}
     </UL>
-    {% elif state %}
-        <H1>State: {{ state.name }}</H1>
+    {% elif state_id in states %}
+        <H1>State: {{ states[state_id].name }}</H1>
         <H3>Cities:</H3>
         <UL>
-            {% for city in state.cities|sort(attribute='name') %}
+            {% for city in states[state_id].cities|sort(attribute='name') %}
             <LI>{{ city.id }}: <B>{{ city.name }}</B></LI>
             {% endfor %}
         </UL>
