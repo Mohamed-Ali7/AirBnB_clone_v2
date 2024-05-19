@@ -23,7 +23,11 @@ def state(id):
     """
     displays a HTML page that contains a list of states
     """
-    state = storage.find_by_id(State, id)
+    state_key = "State.{}".format(id)
+    try:
+        state = storage.all(State)[state_key]
+    except KeyError as e:
+        state = None
     return render_template("9-states.html", state=state)
 
 
